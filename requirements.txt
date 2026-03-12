@@ -1,0 +1,9 @@
+alembic==1.17.2
+fastapi[standard]
+pydantic==2.12.5
+pydantic-settings==2.13.1
+SQLAlchemy==2.0.48
+sqlmodel==0.0.37
+psycopg2==2.9.11
+bcrypt==5.0.0
+vapi-server-sdk==1.9.0
