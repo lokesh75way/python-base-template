@@ -1,13 +1,14 @@
-# db/base.py
 import importlib
 import os
 import pkgutil
+import uuid
 from pathlib import Path
 
-from core.config import settings
 from sqlalchemy import Column, DateTime, create_engine, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, sessionmaker
+
+from core.config import settings
 
 BaseModel = declarative_base()
 
@@ -21,6 +22,7 @@ class Base(BaseModel):
         unique=True,
         nullable=False,
         index=True,
+        default=uuid.uuid4,
     )
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -36,7 +38,6 @@ class Base(BaseModel):
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 models_path = Path(BASE_DIR) / "models"
 
-print(BASE_DIR)
 
 for module_info in pkgutil.iter_modules([str(models_path)]):
     importlib.import_module(f"models.{module_info.name}")

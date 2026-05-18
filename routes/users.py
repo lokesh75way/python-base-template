@@ -1,9 +1,9 @@
-from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from core.database import get_db
 from models.user import User
 from schema.user import CreateUser, LoginUser, UpdateUser
-from services.vapi_service import vapi_service
-from sqlalchemy.orm import Session
 from utils.password import hash_password, verify_password
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -12,15 +12,6 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/")
 def get_all_users(db: Session = Depends(get_db)):
     return db.query(User).all()
-
-
-@router.get("/me")
-def get_user_info():
-    data = vapi_service.list_assistants()
-    return {
-        "message": "Current user info",
-        "data": data,
-    }  # replace with auth dependency
 
 
 @router.get("/{user_id}")
@@ -53,7 +44,6 @@ def create_user(payload: CreateUser, db: Session = Depends(get_db)):
         email=payload.email,
         password=hash_password(payload.password),
     )
-    print(user)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -113,30 +103,6 @@ def invite_user(email: str):
     return {"message": f"Invitation sent to {email}"}
 
 
-@router.post("/verify-invitation")
-def verify_invitation(token: str):
-    return {"message": "Invitation verified", "token": token}
-
-
-@router.post("/reset-password")
-def reset_password(token: str, password: str, db: Session = Depends(get_db)):
-    return {"message": "Password reset successful"}
-
-
-@router.post("/forgot-password")
-def forgot_password(email: str):
-    return {"message": f"Reset password link sent to {email}"}
-
-
-@router.post("/change-password")
-def change_password(
-    old_password: str,
-    new_password: str,
-    db: Session = Depends(get_db),
-):
-    return {"message": "Password changed"}
-
-
 @router.post("/login")
 def login(payload: LoginUser, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
@@ -148,33 +114,3 @@ def login(payload: LoginUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     return {"success": True, "user_id": user.id}
-
-
-@router.post("/refresh-token")
-def refresh_token():
-    return {"message": "Token refreshed"}
-
-
-@router.post("/logout")
-def logout():
-    return {"message": "Logged out successfully"}
-
-
-@router.post("/social/google")
-def google_login():
-    return {"message": "Google login"}
-
-
-@router.post("/social/facebook")
-def facebook_login():
-    return {"message": "Facebook login"}
-
-
-@router.post("/social/linkedin")
-def linkedin_login():
-    return {"message": "LinkedIn login"}
-
-
-@router.post("/social/apple")
-def apple_login():
-    return {"message": "Apple login"}
